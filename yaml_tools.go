@@ -64,7 +64,7 @@ func LoadYamlFile(yamlFilePath string, target interface{}) error {
 
 	err = d.Decode(target)
 	if err != nil {
-		return fmt.Errorf("yaml: LoadYamlFile(): could not decode yaml file: %w", err)
+		return fmt.Errorf("yaml_tools.LoadYamlFile(): could not decode yaml file: %w", err)
 	}
 
 	return nil
