@@ -68,5 +68,31 @@ func LoadYamlFile(yamlFilePath string, target interface{}) error {
 	}
 
 	return nil
+}
 
+// LoadYamlFile loads the contents of a YAML file into a target struct specified by the caller.
+// The target parameter is constrained to any type, enhancing type safety and usability.
+func LoadYamlFileGeneric[T any](yamlFilePath string, target *T) error {
+	if yamlFilePath == "" {
+		return errors.New("yaml_tools.LoadYamlFile(): no yaml file path was provided")
+	}
+
+	if target == nil {
+		return errors.New("yaml_tools.LoadYamlFile(): provided target pointer is nil")
+	}
+
+	file, err := os.Open(yamlFilePath)
+	if err != nil {
+		return fmt.Errorf("yaml_tools.LoadYamlFile(): could not open yaml file: %w", err)
+	}
+	defer file.Close()
+
+	d := yaml.NewDecoder(file)
+
+	err = d.Decode(target)
+	if err != nil {
+		return fmt.Errorf("yaml_tools.LoadYamlFile(): could not decode yaml file: %w", err)
+	}
+
+	return nil
 }
