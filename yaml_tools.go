@@ -44,6 +44,50 @@ func LoadYamlSection(filename, sectionName string, target interface{}) error {
 	return nil
 }
 
+// LoadYamlSection loads a specific section from a YAML file into a given struct
+func LoadYamlSectionGeneric[T any](filename, sectionName string, target *T) error {
+	if filename == "" {
+		return errors.New("no yaml file path was provided")
+	}
+
+	if target == nil {
+		return errors.New("provided target pointer is nil")
+	}
+
+	// Read the entire YAML file
+	yamlData, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read YAML file: %w", err)
+	}
+
+	// Unmarshal into a map
+	var dataMap map[string]interface{}
+	err = yaml.Unmarshal(yamlData, &dataMap)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal YAML into map: %w", err)
+	}
+
+	// Extract the relevant section
+	sectionData, ok := dataMap[sectionName]
+	if !ok {
+		return fmt.Errorf("section '%s' not found in YAML", sectionName)
+	}
+
+	// Marshal the section back into YAML
+	sectionYaml, err := yaml.Marshal(sectionData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal '%s' section data: %w", sectionName, err)
+	}
+
+	// Unmarshal the section YAML into the target struct
+	err = yaml.Unmarshal(sectionYaml, target)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal '%s' section YAML: %w", sectionName, err)
+	}
+
+	return nil
+}
+
 // LoadYamlFile loads a YAML file into a given struct
 func LoadYamlFile(yamlFilePath string, target interface{}) error {
 	if yamlFilePath == "" {
@@ -71,7 +115,6 @@ func LoadYamlFile(yamlFilePath string, target interface{}) error {
 }
 
 // LoadYamlFile loads the contents of a YAML file into a target struct specified by the caller.
-// The target parameter is constrained to any type, enhancing type safety and usability.
 func LoadYamlFileGeneric[T any](yamlFilePath string, target *T) error {
 	if yamlFilePath == "" {
 		return errors.New("yaml_tools.LoadYamlFile(): no yaml file path was provided")
